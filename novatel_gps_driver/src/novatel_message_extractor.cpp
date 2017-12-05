@@ -365,7 +365,7 @@ namespace novatel_gps_driver
       bool keep_nmea_container)
   {
     bool parse_error = false;
-
+    ROS_INFO("\nthingy: %s\n", input.c_str());
     size_t sentence_start = 0;
     while(sentence_start != std::string::npos && sentence_start < input.size())
     {

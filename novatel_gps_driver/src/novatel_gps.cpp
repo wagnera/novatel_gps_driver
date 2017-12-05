@@ -82,11 +82,12 @@ namespace novatel_gps_driver
       ConnectionType connection)
   {
     NovatelMessageOpts opts;
-    opts["gpgga"] = 0.05;
-    opts["gprmc"] = 0.05;
-    opts["bestposa"] = 0.05;
+    opts["gpgga"] = 0.2;
+    opts["gprmc"] = 0.2;
+    opts["bestposa"] = 0.2;
     opts["timea"] = 1.0;
     opts["rangea"] = 1;
+    opts["imuratecorrimus"] = 0.2;
     return Connect(device, connection, opts);
   }
 
@@ -176,7 +177,6 @@ namespace novatel_gps_driver
   NovatelGps::ReadResult NovatelGps::ProcessData()
   {
     NovatelGps::ReadResult read_result = ReadData();
-
     if (read_result != READ_SUCCESS)
     {
       return read_result;
@@ -189,7 +189,7 @@ namespace novatel_gps_driver
 
     if (!data_buffer_.empty())
     {
-      nmea_buffer_.insert(nmea_buffer_.end(),
+     nmea_buffer_.insert(nmea_buffer_.end(),
                           data_buffer_.begin(),
                           data_buffer_.end());
 
@@ -681,22 +681,25 @@ namespace novatel_gps_driver
       swri_serial_util::SerialPort::Result result =
           serial_.ReadBytes(data_buffer_, 0, 1000);
 
+
       if (result == swri_serial_util::SerialPort::ERROR)
       {
+         ROS_WARN("ERROR?");
         error_msg_ = serial_.ErrorMsg();
         return READ_ERROR;
       }
       else if (result == swri_serial_util::SerialPort::TIMEOUT)
       {
         error_msg_ = "Timed out waiting for serial device.";
+        ROS_WARN("Timed out waiting for serial device.");
         return READ_TIMEOUT;
       }
       else if (result == swri_serial_util::SerialPort::INTERRUPTED)
       {
         error_msg_ = "Interrupted during read from serial device.";
+         ROS_WARN("Interrupted during read from serial device.");
         return READ_INTERRUPTED;
       }
-
       return READ_SUCCESS;
     }
     else if (connection_ == TCP || connection_ == UDP)
@@ -1216,7 +1219,7 @@ namespace novatel_gps_driver
 
   bool NovatelGps::Write(const std::string& command)
   {
-    std::vector<uint8_t> bytes(command.begin(), command.end());
+   std::vector<uint8_t> bytes(command.begin(), command.end());
 
     if (connection_ == SERIAL)
     {
@@ -1272,8 +1275,9 @@ namespace novatel_gps_driver
     {
       std::stringstream command;
       command << std::setprecision(3);
-      command << "log " << option->first << " ontime " << option->second << "\n";
+      command << "log " << option->first << " ontime " << option->second << "\r";
       configured = configured && Write(command.str());
+      ROS_INFO("Sent Comamnd: %s",command.str().c_str());
     }
     return configured;
   }

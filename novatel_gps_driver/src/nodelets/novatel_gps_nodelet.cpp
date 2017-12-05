@@ -183,7 +183,7 @@ namespace novatel_gps_driver
       connection_(NovatelGps::SERIAL),
       last_sync_(ros::TIME_MIN),
       rolling_offset_(stats::tag::rolling_window::window_size = 10),
-      expected_rate_(20),
+      expected_rate_(5),
       device_timeouts_(0),
       device_interrupts_(0),
       device_errors_(0),
@@ -581,7 +581,6 @@ namespace novatel_gps_driver
       std::vector<gps_common::GPSFixPtr> fix_msgs;
       std::vector<novatel_gps_msgs::GpggaPtr> gpgga_msgs;
       std::vector<novatel_gps_msgs::GprmcPtr> gprmc_msgs;
-
       // This call appears to block if the serial device is disconnected
       NovatelGps::ReadResult result = gps_.ProcessData();
       if (result == NovatelGps::READ_ERROR)
